@@ -43,9 +43,35 @@ sudo chmod +x /usr/local/bin/docker-compose
 
 
 #
+# disable resolved as we use dnsmasq
+#
+sudo systemctl disable systemd-resolved
+
+
+
+#
+# update resolv.conf
+#
+sudo rm /etc/resolv.conf
+echo nameserver 8.8.8.8 | sudo tee /etc/resolv.conf
+sudo chattr +i /etc/resolv.conf
+
+
+
+#
 # netboot
 #
 sudo apt-get install -y dnsmasq webfs
+
+
+
+#
+# copy additional dnsmasq conf to /etc/ and
+# keep backup to later recover placeholder ServerIP string
+# in conf file
+#
+sudo cp dnsmasq.wst.conf /etc/dnsmasq.wst.conf
+sudo cp dnsmasq.wst.conf /etc/dnsmasq.wst.conf.original
 
 
 
@@ -61,19 +87,19 @@ sudo cp -arv var/lib/kiosk/* /var/lib/kiosk/
 cd $BASEDIR
 
 
+
 #
-# disable resolved as we use dnsmasq
+# copy efi bootloader to kiosk folder
 #
-sudo systemctl disable systemd-resolved
+sudo cp bootx64.efi /var/lib/kiosk/boot/
 
 
 
 #
-# update resolv.conf
+# copy grub config file for efi bootloader
 #
-sudo rm /etc/resolv.conf
-echo nameserver 8.8.8.8 | sudo tee /etc/resolv.conf
-sudo chattr +i /etc/resolv.conf
+sudo mkdir -p /var/lib/kiosk/boot/grub/
+sudo cp grub.cfg /var/lib/kiosk/boot/grub/grub.cfg
 
 
 

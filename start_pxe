@@ -42,6 +42,27 @@ a=`echo $IP|cut -d. -f1,2`;b=`echo ".0.0"`;sudo echo "dhcp-range=$a$b,proxy" >> 
 
 
 #
+# tell dnsmasq to use extra conf which contains options
+# to allow server to serve both BIOS and UEFI clients
+#
+sudo echo conf-file=/etc/dnsmasq.wst.conf >> /etc/dnsmasq.conf
+
+
+
+#
+# restore placeholder strings in extra conf file
+#
+sudo cp /etc/dnsmasq.wst.conf.original /etc/dnsmasq.wst.conf
+
+
+
+#
+# add server IP in extra conf file
+#
+sudo sed -i -e "s/ServerIP/$IP/g" /etc/dnsmasq.wst.conf
+
+
+#
 # Port on which the HTTP daemon is listening:
 #
 PORT=8090
@@ -53,7 +74,7 @@ PORT=8090
 #
 sudo systemctl stop systemd-resolved
 sudo killall dnsmasq 2>/dev/null
-sudo dnsmasq --enable-tftp --tftp-root=$PXEDATA/boot --dhcp-boot=pxelinux.0,"$IP",$IP --dhcp-range=$(echo $IP | cut -d. -f1-2).200.1,$(echo $IP | cut -d. -f1-2).201.254,infinite --log-dhcp
+sudo dnsmasq --enable-tftp --tftp-root=$PXEDATA/boot --dhcp-range=$(echo $IP | cut -d. -f1-2).200.1,$(echo $IP | cut -d. -f1-2).201.254,infinite --log-dhcp
 
 
 
@@ -70,11 +91,20 @@ sudo webfsd -i 0.0.0.0 -p $PORT -r $PXEDATA -u nobody -g nogroup
 sudo echo 1 > /proc/sys/net/ipv4/ip_forward
 
 
+
 #
 # add entry in /var/lib/kiosk/boot/pxelinux.cfg/default
 #
 sudo sed -i '/^append/d' /var/lib/kiosk/boot/pxelinux.cfg/default
 sudo echo "append initrd=initrd.xz,pxelinux.cfg/initrdpxe.xz quiet http_server=$IP:8090" >> /var/lib/kiosk/boot/pxelinux.cfg/default
+
+
+
+#
+# add exam server IP address and port in grub.cfg
+#
+sudo sed -i -e "s/ServerAddressAndPort/$IP:$PORT/g" /var/lib/kiosk/boot/grub/grub.cfg
+
 
 
 #
