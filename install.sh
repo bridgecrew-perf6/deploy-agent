@@ -103,6 +103,13 @@ sudo mkdir -p /var/lib/kiosk/boot/grub/
 sudo cp grub.cfg /var/lib/kiosk/boot/grub/grub.cfg
 
 
+#
+# give permissions so that client machine can access
+# via netboot ( issue seen at APCOER UEFI thing. )
+# 777 gives read, write and execute permission to the owner, group and public.
+#
+sudo chmod 777 /var/lib/kiosk/boot/grub/grub.cfg
+
 
 #
 # copy system configs
