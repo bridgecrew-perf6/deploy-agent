@@ -45,6 +45,7 @@ sudo chmod +x /usr/local/bin/docker-compose
 #
 # disable resolved as we use dnsmasq
 #
+sudo systemctl stop systemd-resolved
 sudo systemctl disable systemd-resolved
 
 
